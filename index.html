@@ -129,6 +129,59 @@
 		const container = document.getElementById('word-count');
 		container.textContent = `全文约 ${count} 字 作者：毛江俊`;
 	})();
+	
+	// 反爬
+	(function() {
+	    // 禁止右键菜单
+	    document.addEventListener('contextmenu', e => e.preventDefault());
+	
+	    // 禁止文本选择
+	    document.addEventListener('selectstart', e => e.preventDefault());
+	
+	    // 禁止拖拽（防止把文字拖到地址栏或桌面）
+	    document.addEventListener('dragstart', e => e.preventDefault());
+	
+	    // 禁止键盘快捷键：Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U, F12
+	    document.addEventListener('keydown', function(e) {
+	        // 阻止 Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U
+	        if (e.ctrlKey && (
+	            e.key === 'c' || e.key === 'x' || 
+	            e.key === 's' || e.key === 'u'
+	        )) {
+	            e.preventDefault();
+	        }
+	        // 阻止 F12 开发者工具
+	        if (e.key === 'F12') {
+	            e.preventDefault();
+	        }
+	        // 阻止 Ctrl+Shift+I 打开开发者工具
+	        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+	            e.preventDefault();
+	        }
+	    });
+	})();
+	
+	// 移动端反爬
+	(function() {
+	    // 禁止长按弹出菜单（iOS/安卓）
+	    document.addEventListener('touchstart', function(e) {
+	        if (e.target.closest('p, h1, h2, span, div')) {
+	            e.preventDefault(); // 阻止长按菜单
+	        }
+	    }, { passive: false });
+	
+	    // 禁止选择文本（微信等浏览器里更激进）
+	    document.body.style.webkitUserSelect = 'none';
+	    document.body.style.userSelect = 'none';
+	
+	    // 禁止 iOS 放大镜和文本选择框
+	    document.body.style.webkitTouchCallout = 'none';
+	
+	    // 禁止双击缩放（避免文本被放大复制）
+	    document.addEventListener('dblclick', function(e) {
+	        e.preventDefault();
+	    }, { passive: false });
+	})();
 </script>
 <style>
 	/* ========== 全局 ========== */
@@ -139,6 +192,10 @@
 		/* 使用 rem 让间距随根字体缩放 */
 		display: flex;
 		justify-content: center;
+		
+		-webkit-touch-callout: none; /* 禁止iOS长按弹出菜单 */
+		-webkit-user-select: none;   /* 禁止iOS选中文字 */
+		user-select: none;           /* 禁止所有设备选中文字 */
 	}
 	
 	/* ========== 大标题下方短语 ========== */
@@ -305,5 +362,32 @@
 		.visit-counter {
 		    font-size: 0.75rem;
 		}
+	}
+	
+	/* 全屏水印层 */
+	body::after {
+	    content: "";
+	    position: fixed;
+	    top: 0;
+	    left: 0;
+	    width: 100%;
+	    height: 100%;
+	    pointer-events: none;
+	    z-index: 9999;
+	    background-image: repeating-linear-gradient(
+	        45deg,
+	        transparent,
+	        transparent 100px,
+	        rgba(0, 0, 0, 0.015) 100px,
+	        rgba(0, 0, 0, 0.015) 200px
+	    );
+	}
+	
+	
+	/* 文章区域如果需要放行选择（比如你想让人家复制就删掉这些） */
+	.article, .article * {
+	    -webkit-touch-callout: none;
+	    -webkit-user-select: none;
+	    user-select: none;
 	}
 </style>
