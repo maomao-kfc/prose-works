@@ -163,21 +163,19 @@
 	
 	// 移动端反爬
 	(function() {
-	    // 禁止长按弹出菜单（iOS/安卓）
-	    document.addEventListener('touchstart', function(e) {
-	        if (e.target.closest('p, h1, h2, span, div')) {
-	            e.preventDefault(); // 阻止长按菜单
-	        }
-	    }, { passive: false });
+	    // 禁止长按弹出菜单（不影响滚动）
+	    document.addEventListener('contextmenu', function(e) {
+	        e.preventDefault();
+	    });
 	
-	    // 禁止选择文本（微信等浏览器里更激进）
+	    // 禁止文本选择
 	    document.body.style.webkitUserSelect = 'none';
 	    document.body.style.userSelect = 'none';
 	
 	    // 禁止 iOS 放大镜和文本选择框
 	    document.body.style.webkitTouchCallout = 'none';
 	
-	    // 禁止双击缩放（避免文本被放大复制）
+	    // 可选：禁止双击缩放
 	    document.addEventListener('dblclick', function(e) {
 	        e.preventDefault();
 	    }, { passive: false });
