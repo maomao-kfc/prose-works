@@ -98,10 +98,16 @@
 			</div>
 			<!-- 字数统计展示行 -->
 			<div id="word-count" style="text-align: center; color: #999; font-size: 0.9rem; margin-bottom: 2rem;"></div>
+			<div class="visit-counter" style="text-align: center; margin-top: 2rem; color: #b0a89a; font-size: 0.85rem;">
+			  <span id="busuanzi_container_site_uv" style="display:none;">
+			    已有 <span id="busuanzi_value_site_uv"></span> 位朋友来过
+			  </span>
+			</div>
 		</div>
-
+		
 	</body>
 </html>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <script>
 	(function() {
 		// 获取所有段落文本
@@ -294,6 +300,10 @@
 		.topic span {
 		    font-size: 0.85rem;
 		    margin-bottom: 1.5rem;
+		}
+		
+		.visit-counter {
+		    font-size: 0.75rem;
 		}
 	}
 </style>
