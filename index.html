@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
+		<!-- 这条指令告诉手机浏览器“请按我的屏幕宽度来显示页面，是响应式设计的开关。 -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>散文</title>
 	</head>
@@ -96,6 +97,7 @@
 				<h2>Quotation and Creation</h2>
 				<p>喜欢有很多，看你好好生活，也是一种</p>
 			</div>
+			<div id="read-marker" style="height: 1px;"></div>
 			<!-- 字数统计展示行 -->
 			<div id="word-count" style="text-align: center; color: #999; font-size: 0.9rem; margin-bottom: 2rem;"></div>
 			<div class="visit-counter" style="text-align: center; margin-top: 2rem; color: #b0a89a; font-size: 0.85rem;">
@@ -179,6 +181,84 @@
 	    document.addEventListener('dblclick', function(e) {
 	        e.preventDefault();
 	    }, { passive: false });
+	})();
+	
+	// 阅读完成监测 + 计数
+	(function() {
+	    const READ_KEY = 'mao-prose-finished';  // 计数器唯一标识
+	    const NAMESPACE = 'mao-prose-site';      // 命名空间
+	    const counterUrl = `https://api.countapi.xyz/hit/${NAMESPACE}/${READ_KEY}`;
+	
+	    // 去重：如果这个浏览器已经计过数，就不再触发
+	    if (localStorage.getItem('hasReadFinished')) {
+	        // 仅展示现有数字
+	        fetch(counterUrl + '?action=get')
+	            .then(res => res.json())
+	            .then(data => {
+	                const count = data.value || 0;
+	                displayCount(count);
+	            });
+	        return;
+	    }
+	
+	    // 监测文章末尾标记
+	    const marker = document.getElementById('read-marker');
+	    if (!marker) return;
+	
+	    let observer = new IntersectionObserver((entries) => {
+	        if (entries[0].isIntersecting) {
+	            // 用户划到了末尾
+	            observer.disconnect(); // 只触发一次
+	
+	            // 调用计数接口（自动 +1，若不存在则创建）
+	            fetch(counterUrl + '?action=hit')
+	                .then(res => res.json())
+	                .then(data => {
+	                    const count = data.value;
+	                    displayCount(count);
+	                    // 标记该浏览器已读，避免重复
+	                    localStorage.setItem('hasReadFinished', 'true');
+	                })
+	                .catch(() => {
+	                    // 若接口失败（比如被墙），可降级为本地计数
+	                    let localCount = parseInt(localStorage.getItem('localReadCount') || '0');
+	                    localCount++;
+	                    localStorage.setItem('localReadCount', localCount);
+	                    displayCount(localCount);
+	                });
+	        }
+	    }, { threshold: 1.0 }); // 标记露出50%即认为读完
+	
+	    observer.observe(marker);
+	
+	    // 页面加载时先尝试显示已存储的数字
+	    fetch(counterUrl + '?action=get')
+	        .then(res => res.json())
+	        .then(data => {
+	            displayCount(data.value || 0);
+	        })
+	        .catch(() => {
+	            const local = localStorage.getItem('localReadCount');
+	            if (local) displayCount(parseInt(local));
+	        });
+	
+	    // 更新页面数字
+	    function displayCount(num) {
+	        // 在访问量统计旁边追加一个显示区域
+	        let readEl = document.getElementById('read-count');
+	        if (!readEl) {
+	            readEl = document.createElement('div');
+	            readEl.id = 'read-count';
+	            readEl.style.cssText = 'text-align: center; color: #b0a89a; font-size: 0.85rem; margin-top: 0.5rem;';
+	            const visitCounter = document.querySelector('.visit-counter');
+	            if (visitCounter) {
+	                visitCounter.parentNode.insertBefore(readEl, visitCounter.nextSibling);
+	            } else {
+	                document.querySelector('.article').appendChild(readEl);
+	            }
+	        }
+	        readEl.textContent = `已有 ${num} 人读完了全文`;
+	    }
 	})();
 </script>
 <style>
