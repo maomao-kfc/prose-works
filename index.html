@@ -185,19 +185,18 @@
 	
 	// 阅读完成监测 + 计数
 	(function() {
-	    const READ_KEY = 'mao-prose-finished';  // 计数器唯一标识
-	    const NAMESPACE = 'mao-prose-site';      // 命名空间
+	    const READ_KEY = 'mao-prose-finished';
+	    const NAMESPACE = 'mao-prose-site';
 	    const counterUrl = `https://api.countapi.xyz/hit/${NAMESPACE}/${READ_KEY}`;
 	
-	    // 去重：如果这个浏览器已经计过数，就不再触发
+	    // 如果标记为作者，则完全不参与计数与显示
+	    if (localStorage.getItem('isAuthor') === 'true') {
+	        return;
+	    }
+	
+	    // 如果本浏览器已经触发过读完计数，只显示数字，不再监听
 	    if (localStorage.getItem('hasReadFinished')) {
-	        // 仅展示现有数字
-	        fetch(counterUrl + '?action=get')
-	            .then(res => res.json())
-	            .then(data => {
-	                const count = data.value || 0;
-	                displayCount(count);
-	            });
+	        fetchCountAndDisplay();
 	        return;
 	    }
 	
@@ -205,46 +204,47 @@
 	    const marker = document.getElementById('read-marker');
 	    if (!marker) return;
 	
-	    let observer = new IntersectionObserver((entries) => {
+	    const observer = new IntersectionObserver((entries) => {
 	        if (entries[0].isIntersecting) {
-	            // 用户划到了末尾
-	            observer.disconnect(); // 只触发一次
+	            observer.disconnect();
 	
-	            // 调用计数接口（自动 +1，若不存在则创建）
+	            // 关键：立即本地去重，防止网络请求重试导致多次计数
+	            localStorage.setItem('hasReadFinished', 'true');
+	
+	            // 调用计数接口（+1）
 	            fetch(counterUrl + '?action=hit')
 	                .then(res => res.json())
 	                .then(data => {
-	                    const count = data.value;
-	                    displayCount(count);
-	                    // 标记该浏览器已读，避免重复
-	                    localStorage.setItem('hasReadFinished', 'true');
+	                    displayCount(data.value);
 	                })
 	                .catch(() => {
-	                    // 若接口失败（比如被墙），可降级为本地计数
+	                    // 接口失败：使用本地降级计数（每个浏览器各自维护）
 	                    let localCount = parseInt(localStorage.getItem('localReadCount') || '0');
 	                    localCount++;
 	                    localStorage.setItem('localReadCount', localCount);
 	                    displayCount(localCount);
 	                });
 	        }
-	    }, { threshold: 1.0 }); // 标记露出50%即认为读完
+	    }, { threshold: 1.0 }); // 整个标记露出才触发
 	
 	    observer.observe(marker);
 	
-	    // 页面加载时先尝试显示已存储的数字
-	    fetch(counterUrl + '?action=get')
-	        .then(res => res.json())
-	        .then(data => {
-	            displayCount(data.value || 0);
-	        })
-	        .catch(() => {
-	            const local = localStorage.getItem('localReadCount');
-	            if (local) displayCount(parseInt(local));
-	        });
+	    // 页面加载时先显示当前计数
+	    fetchCountAndDisplay();
 	
-	    // 更新页面数字
+	    function fetchCountAndDisplay() {
+	        fetch(counterUrl + '?action=get')
+	            .then(res => res.json())
+	            .then(data => {
+	                displayCount(data.value || 0);
+	            })
+	            .catch(() => {
+	                const local = localStorage.getItem('localReadCount');
+	                if (local) displayCount(parseInt(local));
+	            });
+	    }
+	
 	    function displayCount(num) {
-	        // 在访问量统计旁边追加一个显示区域
 	        let readEl = document.getElementById('read-count');
 	        if (!readEl) {
 	            readEl = document.createElement('div');
