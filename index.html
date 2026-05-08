@@ -2,9 +2,203 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<!-- 这条指令告诉手机浏览器“请按我的屏幕宽度来显示页面，是响应式设计的开关。 -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>散文</title>
+		<style>
+			/* ========== 全局 ========== */
+			body {
+				background-color: #f5f0e8;
+				margin: 0;
+				padding: 2rem 1rem;
+				display: flex;
+				justify-content: center;
+				overflow-x: hidden;
+				overflow-y: auto;
+				touch-action: pan-y;
+				height: 100vh;
+				box-sizing: border-box;
+			}
+
+			/* ========== 大标题下方短语 ========== */
+			.topic span {
+				display: block;
+				text-align: center;
+				font-size: 0.95rem;
+				color: #5a5a5a;
+				margin-top: -1.5rem;
+				margin-bottom: 2rem;
+				letter-spacing: 0.05em;
+			}
+
+			/* ========== 文章卡片 ========== */
+			.article {
+				max-width: 720px;
+				width: 100%;
+				background: #fffef9;
+				padding: 3rem 2.5rem;
+				position: relative;
+				border-radius: 4px;
+				box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+				font-family: "Noto Serif SC", "Songti SC", "SimSun", "宋体", Georgia, serif;
+				color: #3a3a3a;
+				line-height: 2;
+				overflow: unset;
+				touch-action: pan-y;
+				box-sizing: border-box;
+				flex-shrink: 0;
+			}
+
+			/* ========== 标题 ========== */
+			.article h1,
+			.article h2 {
+				text-align: center;
+				font-size: 2.4rem;
+				font-weight: 700;
+				margin: 0 0 1.2rem 0;
+				letter-spacing: 0.1em;
+				color: #2c2c2c;
+			}
+
+			.article h1 {
+				font-size: 2.8rem;
+				margin-bottom: 0.3rem;
+			}
+
+			/* ========== 段落 ========== */
+			.article p {
+				margin: 0;
+				text-indent: 2em;
+				font-size: 1.05rem;
+				word-break: break-word;
+				overflow-wrap: break-word;
+			}
+
+			.article p:last-child {
+				margin-bottom: 0;
+			}
+
+			/* ========== 字数统计 ========== */
+			#word-count {
+				position: absolute;
+				bottom: calc(-3rem - 20px);
+				right: 2.5rem;
+				font-size: 0.85rem;
+				color: #b0a89a;
+				white-space: nowrap;
+				font-family: inherit;
+			}
+
+			/* ========== 响应式：平板及以下 ========== */
+			@media (max-width: 768px) {
+				body {
+					padding: 1rem 0.5rem;
+				}
+
+				.article {
+					padding: 2rem 1.5rem;
+				}
+
+				.article h1,
+				.article h2 {
+					font-size: 1.8rem;
+					margin-bottom: 1.8rem;
+				}
+
+				.article h1 {
+					font-size: 2.1rem;
+				}
+
+				.article p {
+					font-size: 1rem;
+					text-indent: 1.5em;
+				}
+
+				#word-count {
+					bottom: calc(-2rem - 20px);
+					right: 1.5rem;
+				}
+
+				.topic span {
+					font-size: 0.9rem;
+					margin-bottom: 1.8rem;
+				}
+			}
+
+			/* ========== 响应式：手机 ========== */
+			@media (max-width: 480px) {
+				body {
+					padding: 0.5rem;
+					height: 100vh;
+				}
+
+				.article {
+					padding: 1.5rem 1rem;
+					box-shadow: none;
+					border-radius: 0;
+				}
+
+				.article h1,
+				.article h2 {
+					font-size: 1.6rem;
+					margin-bottom: 1.5rem;
+				}
+
+				.article h1 {
+					font-size: 1.9rem;
+				}
+
+				.article p {
+					font-size: 0.95rem;
+					text-indent: 1.2em;
+					line-height: 1.9;
+				}
+
+				#word-count {
+					bottom: calc(-2.5rem - 20px);
+					right: 1rem;
+					font-size: 0.75rem;
+				}
+
+				.topic span {
+					font-size: 0.85rem;
+					margin-bottom: 1.5rem;
+				}
+
+				.visit-counter {
+					font-size: 0.75rem;
+				}
+			}
+
+			/* 全屏水印层 */
+			body::after {
+				content: "";
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				pointer-events: none;
+				z-index: 9999;
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='rgba(0,0,0,0.05)' transform='rotate(-30, 100, 50)'%3E毛江俊%3C/text%3E%3C/svg%3E");
+				background-repeat: repeat;
+			}
+
+			/* 仅禁止文本选择，不影响容器滚动 */
+			.article p,
+			.article h1,
+			.article h2,
+			.article span {
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				user-select: none;
+			}
+
+			.article,
+			body {
+				-webkit-user-select: auto;
+				user-select: auto;
+			}
+		</style>
 	</head>
 	<body>
 		<div class="article">
@@ -105,8 +299,7 @@
 				<p>喜欢有很多，看你好好生活，也是一种</p>
 			</div>
 			<div id="read-marker" style="height: 1px;"></div>
-			<!-- 字数统计展示行 -->
-			<!-- <div id="word-count" style="text-align: center; color: #999; font-size: 0.9rem; margin-bottom: 2rem;"></div> -->
+			<div id="word-count" style="text-align: center; color: #999; font-size: 0.9rem; margin-bottom: 2rem;"></div>
 			<div class="visit-counter"
 				style="text-align: center; margin-top: 2rem; color: #b0a89a; font-size: 0.85rem;">
 				<span id="busuanzi_container_site_uv" style="display:none;">
@@ -115,242 +308,56 @@
 			</div>
 		</div>
 
+		<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+		<script>
+			// 字数统计（保留原逻辑）
+			(function() {
+				const paragraphs = document.querySelectorAll('.article p');
+				let fullText = '';
+				paragraphs.forEach(p => {
+					fullText += p.textContent;
+				});
+				const nonSpaceText = fullText.replace(/\s/g, '');
+				const count = nonSpaceText.length;
+				const container = document.getElementById('word-count');
+				container.textContent = `全文约 ${count} 字 作者：毛江俊`;
+			})();
 
+			// 优化反爬：仅禁止复制/右键，不影响滚动
+			(function() {
+				// 禁止右键菜单（保留）
+				document.addEventListener('contextmenu', e => e.preventDefault());
+
+				// 禁止文本选择（仅针对文本元素）
+				document.addEventListener('selectstart', e => {
+					if (['P', 'H1', 'H2', 'SPAN'].includes(e.target.tagName)) {
+						e.preventDefault();
+					}
+				});
+
+				// 禁止拖拽（保留）
+				document.addEventListener('dragstart', e => e.preventDefault());
+
+				// 优化键盘快捷键禁止：仅禁止复制/保存，不影响其他
+				document.addEventListener('keydown', function(e) {
+					if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
+						e.preventDefault();
+					}
+					if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+						e.preventDefault();
+					}
+				});
+			})();
+
+			// 移动端反爬：仅针对文本元素禁止选择，不影响滚动
+			(function() {
+				const textElements = document.querySelectorAll('.article p, .article h1, .article h2, .article span');
+				textElements.forEach(el => {
+					el.style.webkitUserSelect = 'none';
+					el.style.userSelect = 'none';
+					el.style.webkitTouchCallout = 'none';
+				});
+			})();
+		</script>
 	</body>
 </html>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<script>
-	// 字数统计（保留原逻辑）
-	(function() {
-		const paragraphs = document.querySelectorAll('.article p');
-		let fullText = '';
-		paragraphs.forEach(p => {
-			fullText += p.textContent;
-		});
-		const nonSpaceText = fullText.replace(/\s/g, '');
-		const count = nonSpaceText.length;
-		const container = document.getElementById('word-count');
-		container.textContent = `全文约 ${count} 字 作者：毛江俊`;
-	})();
-
-	// 优化反爬：仅禁止复制/右键，不影响滚动
-	(function() {
-		// 禁止右键菜单（保留）
-		document.addEventListener('contextmenu', e => e.preventDefault());
-
-		// 禁止文本选择（保留）
-		document.addEventListener('selectstart', e => e.preventDefault());
-
-		// 禁止拖拽（保留）
-		document.addEventListener('dragstart', e => e.preventDefault());
-
-		// 优化键盘快捷键禁止：仅禁止复制/保存，不影响其他
-		document.addEventListener('keydown', function(e) {
-			if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
-				e.preventDefault();
-			}
-			if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
-				e.preventDefault();
-			}
-		});
-	})();
-
-	// 移动端反爬：移除影响滚动的事件，仅保留文字不可选
-	(function() {
-		// 仅保留CSS层面的禁止选择，移除所有触摸/点击阻止事件
-		document.body.style.webkitUserSelect = 'none';
-		document.body.style.userSelect = 'none';
-		document.body.style.webkitTouchCallout = 'none';
-	})();
-</script>
-<style>
-	/* ========== 全局 ========== */
-	body {
-		background-color: #f5f0e8;
-		margin: 0;
-		padding: 2rem 1rem;
-		display: flex;
-		justify-content: center;
-		/* 关键：添加滚动相关样式，确保移动端可滚动 */
-		overflow-x: hidden;
-		touch-action: auto;
-		/* 允许触摸滚动，修复划不动核心 */
-	}
-
-	/* ========== 大标题下方短语 ========== */
-	.topic span {
-		display: block;
-		text-align: center;
-		font-size: 0.95rem;
-		color: #5a5a5a;
-		margin-top: -1.5rem;
-		margin-bottom: 2rem;
-		letter-spacing: 0.05em;
-	}
-
-	/* ========== 文章卡片 ========== */
-	.article {
-		max-width: 720px;
-		width: 100%;
-		background: #fffef9;
-		padding: 3rem 2.5rem;
-		position: relative;
-		border-radius: 4px;
-		box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
-		font-family: "Noto Serif SC", "Songti SC", "SimSun", "宋体", Georgia, serif;
-		color: #3a3a3a;
-		line-height: 2;
-		/* 关键：允许容器内部滚动 */
-		overflow: visible;
-		touch-action: pan-y;
-		/* 仅允许垂直滚动，适配手机端 */
-	}
-
-	/* ========== 标题 ========== */
-	.article h1,
-	.article h2 {
-		text-align: center;
-		font-size: 2.4rem;
-		font-weight: 700;
-		margin: 0 0 1.2rem 0;
-		letter-spacing: 0.1em;
-		color: #2c2c2c;
-	}
-
-	.article h1 {
-		font-size: 2.8rem;
-		margin-bottom: 0.3rem;
-	}
-
-	/* ========== 段落 ========== */
-	.article p {
-		margin: 0;
-		text-indent: 2em;
-		font-size: 1.05rem;
-		word-break: break-word;
-		overflow-wrap: break-word;
-	}
-
-	.article p:last-child {
-		margin-bottom: 0;
-	}
-
-	/* ========== 字数统计 ========== */
-	#word-count {
-		position: absolute;
-		bottom: calc(-3rem - 20px);
-		right: 2.5rem;
-		font-size: 0.85rem;
-		color: #b0a89a;
-		white-space: nowrap;
-		font-family: inherit;
-	}
-
-	@media (max-width: 480px) {
-		#word-count {
-			font-size: 0.85rem;
-		}
-	}
-
-	/* ========== 响应式：平板及以下 ========== */
-	@media (max-width: 768px) {
-		body {
-			padding: 1rem 0.5rem;
-		}
-
-		.article {
-			padding: 2rem 1.5rem;
-		}
-
-		.article h1,
-		.article h2 {
-			font-size: 1.8rem;
-			margin-bottom: 1.8rem;
-		}
-
-		.article h1 {
-			font-size: 2.1rem;
-		}
-
-		.article p {
-			font-size: 1rem;
-			text-indent: 1.5em;
-		}
-
-		#word-count {
-			bottom: calc(-2rem - 20px);
-			right: 1.5rem;
-		}
-
-		.topic span {
-			font-size: 0.9rem;
-			margin-bottom: 1.8rem;
-		}
-	}
-
-	/* ========== 响应式：手机 ========== */
-	@media (max-width: 480px) {
-		body {
-			padding: 0.5rem;
-		}
-
-		.article {
-			padding: 1.5rem 1rem;
-			box-shadow: none;
-			border-radius: 0;
-		}
-
-		.article h1,
-		.article h2 {
-			font-size: 1.6rem;
-			margin-bottom: 1.5rem;
-		}
-
-		.article h1 {
-			font-size: 1.9rem;
-		}
-
-		.article p {
-			font-size: 0.95rem;
-			text-indent: 1.2em;
-			line-height: 1.9;
-		}
-
-		#word-count {
-			bottom: calc(-2.5rem - 20px);
-			right: 1rem;
-			font-size: 0.75rem;
-		}
-
-		.topic span {
-			font-size: 0.85rem;
-			margin-bottom: 1.5rem;
-		}
-
-		.visit-counter {
-			font-size: 0.75rem;
-		}
-	}
-
-	/* 全屏水印层 */
-	body::after {
-		content: "";
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		pointer-events: none;
-		z-index: 9999;
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='rgba(0,0,0,0.05)' transform='rotate(-30, 100, 50)'%3E毛江俊%3C/text%3E%3C/svg%3E");
-		background-repeat: repeat;
-	}
-
-	/* 保留文字不可选，但不影响滚动 */
-	.article,
-	.article * {
-		-webkit-touch-callout: none;
-		-webkit-user-select: none;
-		user-select: none;
-	}
-</style>
