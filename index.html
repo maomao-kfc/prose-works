@@ -83,7 +83,8 @@
 			<div class="five">
 				<h2>火焰特效</h2>
 				<p>我喜欢你，我恨不得昭告天下</p>
-				<p>学校很多人都知道我有喜欢的人，PS的课上，老师教了一个给文字加上火焰特效。我将你的名字"ZXY"作为文字基层为她加上了火焰特效。好幼稚，至少现在的我是这样觉得的。可那时的我脸上挂着的，那是幸福的笑容。那天我还曾跟老师说，我打算25岁结婚。老师问我你有对象吗，我说有，课上作业的素材就是她的名字，25岁先立业再成家。很荒诞，也有向往</p>
+				<p>学校很多人都知道我有喜欢的人，PS的课上，老师教了一个给文字加上火焰特效。我将你的名字"ZXY"作为文字基层为她加上了火焰特效。好幼稚，至少现在的我是这样觉得的。可那时的我脸上挂着的，那是幸福的笑容。那天我还曾跟老师说，我打算25岁结婚。老师问我你有对象吗，我说有，课上作业的素材就是她的名字，25岁先立业再成家。很荒诞，也有向往
+				</p>
 				<p>我们吵架了，我问之前你给我发的那张照片是不是你。"你管那么多？"再发已是红色感叹号。我开始道歉，最后冷静，未能挽回你。</p>
 				<p>2024年我再去加你被通过了，我很开心。寒暄过后，你告诉我你不叫ZXY，那是你朋友，照片也不是你。后面我问你朋友得到证实。人在无语至极的时候真的会笑。我发了动态，改了个签："不想被女人骗"。你的名字我看到过，你的谎言好拙劣，我的选择是放过。
 				</p>
@@ -117,6 +118,8 @@
 
 	</body>
 </html>
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+	data-cf-beacon='{"token": "ab60b105e61d47b9abf03d95d9324e7d"}'></script>
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <script>
 	(function() {
@@ -142,60 +145,60 @@
 
 	// 整合反爬（PC端+移动端，互不冲突）
 	(function() {
-	    // 判断是否为触摸设备（移动端）
-	    const isTouchDevice = 'ontouchstart' in window;
-	
-	    // PC端专属防护
-	    if (!isTouchDevice) {
-	        // 禁止右键菜单
-	        document.addEventListener('contextmenu', e => e.preventDefault());
-	
-	        // 禁止文本选择（仅对文章内容）
-	        document.addEventListener('selectstart', e => {
-	            if (e.target.closest('.article')) e.preventDefault();
-	        });
-	
-	        // 禁止键盘快捷键
-	        document.addEventListener('keydown', function(e) {
-	            // 阻止 Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U
-	            if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
-	                e.preventDefault();
-	            }
-	            // 阻止 F12 和 Ctrl+Shift+I
-	            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
-	                e.preventDefault();
-	            }
-	        });
-	    }
-	
-	    // 移动端专属防护（不影响滚动）
-	    if (isTouchDevice) {
-	        // 禁止长按弹出菜单（这是唯一安全的方式）
-	        document.addEventListener('contextmenu', e => e.preventDefault());
-	    }
-	
-	    // 全局防护（两端通用）
-	    // 禁止拖拽
-	    document.addEventListener('dragstart', e => e.preventDefault());
-	
-	    // 禁止文本选择（仅应用于文章容器，不影响 body 滚动）
-	    const article = document.querySelector('.article');
-	    if (article) {
-	        article.style.webkitUserSelect = 'none';
-	        article.style.userSelect = 'none';
-	        // 仅在触摸设备上禁止 iOS 放大镜
-	        if (isTouchDevice) {
-	            article.style.webkitTouchCallout = 'none';
-	        }
-	    }
-	
-	    // 可选：禁止双击缩放（两端通用）
-	    document.addEventListener('dblclick', function(e) {
-	        e.preventDefault();
-	    }, { passive: false });
-	})();
+		// 判断是否为触摸设备（移动端）
+		const isTouchDevice = 'ontouchstart' in window;
 
-	
+		// PC端专属防护
+		if (!isTouchDevice) {
+			// 禁止右键菜单
+			document.addEventListener('contextmenu', e => e.preventDefault());
+
+			// 禁止文本选择（仅对文章内容）
+			document.addEventListener('selectstart', e => {
+				if (e.target.closest('.article')) e.preventDefault();
+			});
+
+			// 禁止键盘快捷键
+			document.addEventListener('keydown', function(e) {
+				// 阻止 Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U
+				if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
+					e.preventDefault();
+				}
+				// 阻止 F12 和 Ctrl+Shift+I
+				if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+					e.preventDefault();
+				}
+			});
+		}
+
+		// 移动端专属防护（不影响滚动）
+		if (isTouchDevice) {
+			// 禁止长按弹出菜单（这是唯一安全的方式）
+			document.addEventListener('contextmenu', e => e.preventDefault());
+		}
+
+		// 全局防护（两端通用）
+		// 禁止拖拽
+		document.addEventListener('dragstart', e => e.preventDefault());
+
+		// 禁止文本选择（仅应用于文章容器，不影响 body 滚动）
+		const article = document.querySelector('.article');
+		if (article) {
+			article.style.webkitUserSelect = 'none';
+			article.style.userSelect = 'none';
+			// 仅在触摸设备上禁止 iOS 放大镜
+			if (isTouchDevice) {
+				article.style.webkitTouchCallout = 'none';
+			}
+		}
+
+		// 可选：禁止双击缩放（两端通用）
+		document.addEventListener('dblclick', function(e) {
+			e.preventDefault();
+		}, {
+			passive: false
+		});
+	})();
 </script>
 <style>
 	/* ========== 全局 ========== */
