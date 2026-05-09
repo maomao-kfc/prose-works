@@ -139,57 +139,59 @@
 		container.textContent = `全文约 ${count} 字 作者：毛江俊`;
 	})();
 
-	// 反爬
+	// 整合反爬（PC端+移动端，互不冲突）
 	(function() {
-		// 禁止右键菜单
-		document.addEventListener('contextmenu', e => e.preventDefault());
-
-		// 禁止文本选择
-		document.addEventListener('selectstart', e => e.preventDefault());
-
-		// 禁止拖拽（防止把文字拖到地址栏或桌面）
-		document.addEventListener('dragstart', e => e.preventDefault());
-
-		// 禁止键盘快捷键：Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U, F12
-		document.addEventListener('keydown', function(e) {
-			// 阻止 Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U
-			if (e.ctrlKey && (
-					e.key === 'c' || e.key === 'x' ||
-					e.key === 's' || e.key === 'u'
-				)) {
-				e.preventDefault();
-			}
-			// 阻止 F12 开发者工具
-			if (e.key === 'F12') {
-				e.preventDefault();
-			}
-			// 阻止 Ctrl+Shift+I 打开开发者工具
-			if (e.ctrlKey && e.shiftKey && e.key === 'I') {
-				e.preventDefault();
-			}
-		});
-	})();
-
-	// 移动端反爬
-	(function() {
-		// 禁止长按弹出菜单（不影响滚动）
-		document.addEventListener('contextmenu', function(e) {
-			e.preventDefault();
-		});
-
-		// 禁止文本选择
-		document.body.style.webkitUserSelect = 'none';
-		document.body.style.userSelect = 'none';
-
-		// 禁止 iOS 放大镜和文本选择框
-		document.body.style.webkitTouchCallout = 'none';
-
-		// 可选：禁止双击缩放
-		document.addEventListener('dblclick', function(e) {
-			e.preventDefault();
-		}, {
-			passive: false
-		});
+	    // 判断是否为触摸设备（移动端）
+	    const isTouchDevice = 'ontouchstart' in window;
+	
+	    // PC端专属防护
+	    if (!isTouchDevice) {
+	        // 禁止右键菜单
+	        document.addEventListener('contextmenu', e => e.preventDefault());
+	
+	        // 禁止文本选择（仅对文章内容）
+	        document.addEventListener('selectstart', e => {
+	            if (e.target.closest('.article')) e.preventDefault();
+	        });
+	
+	        // 禁止键盘快捷键
+	        document.addEventListener('keydown', function(e) {
+	            // 阻止 Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U
+	            if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
+	                e.preventDefault();
+	            }
+	            // 阻止 F12 和 Ctrl+Shift+I
+	            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+	                e.preventDefault();
+	            }
+	        });
+	    }
+	
+	    // 移动端专属防护（不影响滚动）
+	    if (isTouchDevice) {
+	        // 禁止长按弹出菜单（这是唯一安全的方式）
+	        document.addEventListener('contextmenu', e => e.preventDefault());
+	    }
+	
+	    // 全局防护（两端通用）
+	    // 禁止拖拽
+	    document.addEventListener('dragstart', e => e.preventDefault());
+	
+	    // 禁止文本选择（仅应用于文章容器，不影响 body 滚动）
+	    const article = document.querySelector('.article');
+	    if (article) {
+	        article.style.webkitUserSelect = 'none';
+	        article.style.userSelect = 'none';
+	        // 仅在触摸设备上禁止 iOS 放大镜
+	        if (isTouchDevice) {
+	            article.style.webkitTouchCallout = 'none';
+	        }
+	    }
+	
+	    // 可选：禁止双击缩放（两端通用）
+	    document.addEventListener('dblclick', function(e) {
+	        e.preventDefault();
+	    }, { passive: false });
 	})();
 
 	// 阅读完成监测 + 计数
