@@ -113,6 +113,9 @@
 					已有 <span id="busuanzi_value_site_uv"></span> 位朋友来过
 				</span>
 			</div>
+			<div class="zhuming">
+				<span>原创稿件，未经许可请勿转载</span>
+			</div>
 		</div>
 
 
@@ -296,6 +299,24 @@
 		white-space: nowrap;
 		/* 防止字数太多换行 */
 		font-family: inherit;
+	}
+
+	/* ========== 原创注明 ========== */
+	.zhuming {
+		text-align: center;
+		margin-top: 0.1rem;
+		font-size: 0.8rem;
+		color: #b0a89a;
+		letter-spacing: 0.05em;
+		user-select: none;
+	}
+
+	/* 手机端微调 */
+	@media (max-width: 480px) {
+		.zhuming {
+			font-size: 0.7rem;
+			margin-top: 0.3rem;	/* 手机上也紧凑一点 */
+		}
 	}
 
 	@media (max-width: 480px) {
