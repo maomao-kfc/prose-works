@@ -179,6 +179,46 @@
 		const container = document.getElementById('word-count');
 		container.textContent = `全文约 ${count} 字 作者：毛江俊`;
 	})();
+	
+	// 整合反爬（PC端+移动端，互不冲突，不影响滚动）
+	(function() {
+	    const isTouchDevice = 'ontouchstart' in window;
+	
+	    // PC端专属防护
+	    if (!isTouchDevice) {
+	        document.addEventListener('contextmenu', e => e.preventDefault());
+	        document.addEventListener('selectstart', e => {
+	            if (e.target.closest('.article')) e.preventDefault();
+	        });
+	        document.addEventListener('keydown', function(e) {
+	            if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
+	                e.preventDefault();
+	            }
+	            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+	                e.preventDefault();
+	            }
+	        });
+	    }
+	
+	    // 移动端专属防护（不影响滚动）
+	    if (isTouchDevice) {
+	        document.addEventListener('contextmenu', e => e.preventDefault());
+	    }
+	
+	    // 全局防护
+	    document.addEventListener('dragstart', e => e.preventDefault());
+	    const article = document.querySelector('.article');
+	    if (article) {
+	        article.style.webkitUserSelect = 'none';
+	        article.style.userSelect = 'none';
+	        if (isTouchDevice) {
+	            article.style.webkitTouchCallout = 'none';
+	        }
+	    }
+	    document.addEventListener('dblclick', function(e) {
+	        e.preventDefault();
+	    }, { passive: false });
+	})();
 </script>
 <style>
 	/* ========== 全局 ========== */
@@ -189,9 +229,9 @@
 		display: flex;
 		justify-content: center;
 		/* 反爬代码已注释，如需恢复请移除下方注释标记 */
-		/* user-select: none;  /* 原反爬：禁止选中文字 */ */
-		/* -webkit-user-select: none; */
-		/* -webkit-touch-callout: none; */
+		user-select: none;  /* 原反爬：禁止选中文字 */
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
 	}
 
 	/* ========== 大标题下方短语 ========== */
@@ -348,7 +388,7 @@
 	}
 
 	/* ========== 以下为原反爬代码，已全部注释 ========== */
-	/*
+	/* 
 	body::after {
 		content: "";
 		position: fixed;
@@ -367,5 +407,5 @@
 		-webkit-user-select: none;
 		user-select: none;
 	}
-	*/
+	 */
 </style>
