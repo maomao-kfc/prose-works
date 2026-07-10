@@ -222,41 +222,41 @@
 				}
 			})();
 
-			// ================================================================
-			// 反爬保护（已全部注释，如需恢复请移除注释）
-			// ================================================================
-			// (function() {
-			//   const isTouchDevice = 'ontouchstart' in window;
-			//   if (!isTouchDevice) {
-			//     document.addEventListener('contextmenu', e => e.preventDefault());
-			//     document.addEventListener('selectstart', e => {
-			//       if (e.target.closest('.article')) e.preventDefault();
-			//     });
-			//     document.addEventListener('keydown', function(e) {
-			//       if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
-			//         e.preventDefault();
-			//       }
-			//       if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
-			//         e.preventDefault();
-			//       }
-			//     });
-			//   }
-			//   if (isTouchDevice) {
-			//     document.addEventListener('contextmenu', e => e.preventDefault());
-			//   }
-			//   document.addEventListener('dragstart', e => e.preventDefault());
-			//   const article = document.querySelector('.article');
-			//   if (article) {
-			//     article.style.webkitUserSelect = 'none';
-			//     article.style.userSelect = 'none';
-			//     if (isTouchDevice) {
-			//       article.style.webkitTouchCallout = 'none';
-			//     }
-			//   }
-			//   document.addEventListener('dblclick', function(e) {
-			//     e.preventDefault();
-			//   }, { passive: false });
-			// })();
+			================================================================
+			反爬保护（已全部注释，如需恢复请移除注释）
+			================================================================
+			(function() {
+			  const isTouchDevice = 'ontouchstart' in window;
+			  if (!isTouchDevice) {
+			    document.addEventListener('contextmenu', e => e.preventDefault());
+			    document.addEventListener('selectstart', e => {
+			      if (e.target.closest('.article')) e.preventDefault();
+			    });
+			    document.addEventListener('keydown', function(e) {
+			      if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
+			        e.preventDefault();
+			      }
+			      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+			        e.preventDefault();
+			      }
+			    });
+			  }
+			  if (isTouchDevice) {
+			    document.addEventListener('contextmenu', e => e.preventDefault());
+			  }
+			  document.addEventListener('dragstart', e => e.preventDefault());
+			  const article = document.querySelector('.article');
+			  if (article) {
+			    article.style.webkitUserSelect = 'none';
+			    article.style.userSelect = 'none';
+			    if (isTouchDevice) {
+			      article.style.webkitTouchCallout = 'none';
+			    }
+			  }
+			  document.addEventListener('dblclick', function(e) {
+			    e.preventDefault();
+			  }, { passive: false });
+			})();
 		</script>
 
 		<style>
