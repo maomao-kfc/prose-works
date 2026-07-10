@@ -2,14 +2,12 @@
 <html lang="zh-CN">
 	<head>
 		<meta charset="utf-8">
-		<!-- 响应式视口，确保移动端正确缩放 -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>散文</title>
 	</head>
 	<body>
 		<!-- 文章卡片主体 -->
 		<div class="article">
-			<!-- 主标题和副标题 -->
 			<div class="topic">
 				<h1>北邙山</h1>
 				<span>现在的我终于愿意相信她曾经或许也曾喜欢过我</span>
@@ -54,7 +52,6 @@
 				<p>
 					我不知道我在你心中会是什么样子的成分，也不知道份量，其实不知道也好，有期待。也不敢去赌。后来我去做了很多次命理分析，有很多的答案。答案告诉我，我们或许还会相见，可能或许只是个可能。但知道还有可能，就够了。答案还说你可能还是喜欢过我的。当时我看到后，我不懂的是那你为啥还会拒绝我那么多次。
 				</p>
-
 			</div>
 			<div class="two">
 				<h2>喜欢葬于北邙</h2>
@@ -122,22 +119,17 @@
 				</p>
 				<p>在多年以后，我偶尔会想，你当时看到我问出那句话的时候，心里有没有一瞬间慌过。</p>
 				<p>那个签名挂了很久，某天它变成"一生所有，干净自由"。</p>
-
 			</div>
-
 			<div class="eventual">
 				<h2>最后的[eventual]</h2>
 				<p>时至今日，我终于看清，愿意去相信她或许也曾喜欢过我。我也明白，人和人之间表达情感的方式从来不同。有些人热烈，有些人克制；有些人把喜欢说出口，有些人把喜欢藏在细节里。我曾经感受到的那些瞬间，都是真实存在过的。那些期待、欢喜、失落，也都属于那个时候。感受也未出错，只是我们最后走向了不同的方向。
 				</p>
 				<p>我们的关系———喜欢到了顶部，却停在了爱的大门前</p>
 				<p>她的喜欢只存在于我们之间的那个五年，五年却是昨天</p>
-				<p>
-					命理分析的结果：
-				</p>
+				<p>命理分析的结果：</p>
 				<p>你最愿意去相信“缘分未尽，需待时机”</p>
 				<p>还是“缘满弓份如风”</p>
 				<p>明天存在意义在于让我们不会一直沉溺于昨天</p>
-
 			</div>
 			<div class="Quotation_and_creation">
 				<h2>Quotation and Creation</h2>
@@ -151,10 +143,7 @@
 				<p>如果我们没有相遇，我会感到遗憾</p>
 			</div>
 
-			<!-- 用于“读完计数”的旧标记点（保留，不影响新功能） -->
-			<div id="read-marker" style="height: 1px;"></div>
-
-			<!-- 访问计数显示区域（数字由 JavaScript 动态填充） -->
+			<!-- 访问计数显示区域 -->
 			<div class="visit-counter"
 				style="text-align: center; margin-top: 2rem; color: #b0a89a; font-size: 0.85rem;">
 				已有 <span id="visit-count">0</span> 位朋友来过
@@ -166,124 +155,109 @@
 			</div>
 		</div>
 
-		<!-- 文章外部信息：字数统计和致敬语（右对齐，位于卡片下方） -->
+		<!-- 文章外部信息 -->
 		<div class="article-meta">
 			<div>全文5200字 作者：毛江俊</div>
 			<div>——致青春，致hhy</div>
 		</div>
 
-		<!-- Cloudflare Web Analytics 统计（匿名，不追踪个人） -->
+		<!-- Cloudflare Web Analytics -->
 		<script defer src='https://static.cloudflareinsights.com/beacon.min.js'
 			data-cf-beacon='{"token": "ab60b105e61d47b9abf03d95d9324e7d"}'>
 		</script>
 
 		<script>
-			// ==================== 访问计数（自建 Worker + 滚动触发 + 去重） ====================
-			// ==================== 访问计数（页面加载时自动计数 + 去重） ====================
+			// ================================================================
+			// 访问计数器 - 页面加载时自动计数 + 去重
+			// 标记键名：hasVisited_v5（如需重置，改 v5 为 v6 即可）
+			// Worker URL：https://lucky-sound-6456.1930744179-9b7.workers.dev
+			// ================================================================
 			(function() {
-			    const WORKER_URL = 'https://lucky-sound-6456.1930744179-9b7.workers.dev';
-			    const VISIT_KEY = 'prose-beimang';
-			    const hitUrl = `${WORKER_URL}/${VISIT_KEY}`; // POST 递增
-			    const getUrl = `${WORKER_URL}/${VISIT_KEY}`; // GET 获取
-			
-			    // 第一步：显示当前计数（先获取一次）
-			    fetch(getUrl)
-			        .then(res => res.json())
-			        .then(data => {
-			            document.getElementById('visit-count').textContent = data.count || 0;
-			        })
-			        .catch(() => {
-			            document.getElementById('visit-count').textContent = '0';
-			        });
-			
-			    // 第二步：如果本设备从未计数过，则触发一次 POST 增加计数
-			    if (localStorage.getItem('hasVisited') && !localStorage.getItem('hasVisited_v3')) {
-					localStorage.setItem('hasVisited_v3', 'true'); // 继承旧标记
-			        // 立即发送 POST 请求增加计数
-			        fetch(hitUrl, { method: 'POST' })
-			            .then(res => res.json())
-			            .then(data => {
-			                // 更新页面上的数字
-			                document.getElementById('visit-count').textContent = data.count;
-			                // 标记已访问，防止重复计数
-			                localStorage.setItem('hasVisited', 'true');
-			            })
-			            .catch(() => {
-			                // 网络失败时的降级：本地记录一次
-			                let local = parseInt(localStorage.getItem('localVisitCount') || '0');
-			                local++;
-			                localStorage.setItem('localVisitCount', local);
-			                document.getElementById('visit-count').textContent = local;
-			                // 即使网络失败，也标记已访问，避免下次重复请求
-			                localStorage.setItem('hasVisited', 'true');
-			            });
-			    }
+				const WORKER_URL = 'https://lucky-sound-6456.1930744179-9b7.workers.dev';
+				const VISIT_KEY = 'prose-beimang';
+				const hitUrl = `${WORKER_URL}/${VISIT_KEY}`;
+				const getUrl = `${WORKER_URL}/${VISIT_KEY}`;
+				const MARK_KEY = 'hasVisited_v5';
+
+				// 1. 显示当前计数
+				fetch(getUrl)
+					.then(res => res.json())
+					.then(data => {
+						document.getElementById('visit-count').textContent = data.count || 0;
+					})
+					.catch(() => {
+						document.getElementById('visit-count').textContent = '0';
+					});
+
+				// 2. 如果本设备从未计数过，则触发 POST 增加计数
+				if (!localStorage.getItem(MARK_KEY)) {
+					fetch(hitUrl, {
+							method: 'POST'
+						})
+						.then(res => res.json())
+						.then(data => {
+							document.getElementById('visit-count').textContent = data.count;
+							localStorage.setItem(MARK_KEY, 'true');
+						})
+						.catch(() => {
+							// 降级方案：本地计数
+							let local = parseInt(localStorage.getItem('localVisitCount') || '0');
+							local++;
+							localStorage.setItem('localVisitCount', local);
+							document.getElementById('visit-count').textContent = local;
+							localStorage.setItem(MARK_KEY, 'true');
+						});
+				}
 			})();
-			// ==================== 反爬保护（PC端 + 移动端） ====================
+
+			// ================================================================
+			// 反爬保护（已全部注释，如需恢复请移除注释）
+			// ================================================================
 			// (function() {
-			// 	const isTouchDevice = 'ontouchstart' in window;
-
-			// 	// PC端：禁止右键、文本选择、拖拽，屏蔽常见开发者快捷键
-			// 	if (!isTouchDevice) {
-			// 		document.addEventListener('contextmenu', e => e.preventDefault());
-			// 		document.addEventListener('selectstart', e => {
-			// 			if (e.target.closest('.article')) e.preventDefault();
-			// 		});
-			// 		document.addEventListener('keydown', function(e) {
-			// 			// 阻止 Ctrl+C, Ctrl+X, Ctrl+S, Ctrl+U
-			// 			if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
-			// 				e.preventDefault();
-			// 			}
-			// 			// 阻止 F12 和 Ctrl+Shift+I 打开开发者工具
-			// 			if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
-			// 				e.preventDefault();
-			// 			}
-			// 		});
-			// 	}
-
-			// 	// 移动端：禁止长按弹出菜单（不影响滚动）
-			// 	if (isTouchDevice) {
-			// 		document.addEventListener('contextmenu', e => e.preventDefault());
-			// 	}
-
-			// 	// 全局：禁止拖拽
-			// 	document.addEventListener('dragstart', e => e.preventDefault());
-
-			// 	// 应用 CSS 禁止文本选择到文章容器
-			// 	const article = document.querySelector('.article');
-			// 	if (article) {
-			// 		article.style.webkitUserSelect = 'none';
-			// 		article.style.userSelect = 'none';
-			// 		if (isTouchDevice) {
-			// 			article.style.webkitTouchCallout = 'none';
-			// 		}
-			// 	}
-
-			// 	// 禁止双击缩放（仅作防护）
-			// 	document.addEventListener('dblclick', function(e) {
-			// 		e.preventDefault();
-			// 	}, {
-			// 		passive: false
-			// 	});
+			//   const isTouchDevice = 'ontouchstart' in window;
+			//   if (!isTouchDevice) {
+			//     document.addEventListener('contextmenu', e => e.preventDefault());
+			//     document.addEventListener('selectstart', e => {
+			//       if (e.target.closest('.article')) e.preventDefault();
+			//     });
+			//     document.addEventListener('keydown', function(e) {
+			//       if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
+			//         e.preventDefault();
+			//       }
+			//       if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+			//         e.preventDefault();
+			//       }
+			//     });
+			//   }
+			//   if (isTouchDevice) {
+			//     document.addEventListener('contextmenu', e => e.preventDefault());
+			//   }
+			//   document.addEventListener('dragstart', e => e.preventDefault());
+			//   const article = document.querySelector('.article');
+			//   if (article) {
+			//     article.style.webkitUserSelect = 'none';
+			//     article.style.userSelect = 'none';
+			//     if (isTouchDevice) {
+			//       article.style.webkitTouchCallout = 'none';
+			//     }
+			//   }
+			//   document.addEventListener('dblclick', function(e) {
+			//     e.preventDefault();
+			//   }, { passive: false });
 			// })();
 		</script>
 
-		<!-- 样式定义 -->
 		<style>
 			/* ========== 全局背景与居中布局 ========== */
 			body {
 				background-color: #f5f0e8;
-				/* 柔和米色背景 */
 				margin: 0;
 				padding: 2rem 1rem;
 				display: flex;
 				flex-direction: column;
-				/* 垂直排列，方便卡片和外部信息 */
 				align-items: center;
-				/* 水平居中 */
 			}
 
-			/* 主标题下方的小字 */
 			.topic span {
 				display: block;
 				text-align: center;
@@ -294,24 +268,19 @@
 				letter-spacing: 0.05em;
 			}
 
-			/* 文章卡片样式 */
 			.article {
 				max-width: 720px;
 				width: 100%;
 				background: #fffef9;
-				/* 浅米色纸质感背景 */
 				padding: 3rem 2.5rem;
 				position: relative;
-				/* 为内部绝对定位的标记点提供参考 */
 				border-radius: 4px;
 				box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
 				font-family: "Noto Serif SC", "Songti SC", "SimSun", "宋体", Georgia, serif;
 				color: #3a3a3a;
 				line-height: 2;
-				/* 舒适的行高 */
 			}
 
-			/* 章节标题 */
 			.article h1,
 			.article h2 {
 				text-align: center;
@@ -322,17 +291,14 @@
 				color: #2c2c2c;
 			}
 
-			/* 主标题更大 */
 			.article h1 {
 				font-size: 2.8rem;
 				margin-bottom: 0.3rem;
 			}
 
-			/* 段落样式 */
 			.article p {
 				margin: 0;
 				text-indent: 2em;
-				/* 首行缩进两个字符 */
 				font-size: 1.05rem;
 				word-break: break-word;
 				overflow-wrap: break-word;
@@ -342,21 +308,18 @@
 				margin-bottom: 0;
 			}
 
-			/* 卡片外部信息（字数、致敬） */
 			.article-meta {
 				max-width: 840px;
 				width: 100%;
 				padding: 0 2.5rem;
 				margin-top: 0.5rem;
 				text-align: right;
-				/* 右对齐 */
 				color: #b0a89a;
 				font-size: 0.85rem;
 				line-height: 1.8;
 				box-sizing: border-box;
 			}
 
-			/* 原创声明居中，字号更小 */
 			.zhuming {
 				text-align: center;
 				margin-top: 0.1rem;
@@ -365,7 +328,6 @@
 				letter-spacing: 0.05em;
 			}
 
-			/* ========== 响应式：平板端 ========== */
 			@media (max-width: 768px) {
 				body {
 					padding: 1rem 0.5rem;
@@ -400,7 +362,6 @@
 				}
 			}
 
-			/* ========== 响应式：手机端 ========== */
 			@media (max-width: 480px) {
 				body {
 					padding: 0.5rem;
