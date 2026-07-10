@@ -37,6 +37,14 @@ export async function onRequest(context) {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
-
+  
+  // DELETE 重置计数
+  if (request.method === 'DELETE') {
+      await env.VISIT_COUNTER.put(key, '0');
+      return new Response(JSON.stringify({ count: 0 }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+  }
+  
   return new Response('Method Not Allowed', { status: 405 });
 }

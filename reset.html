@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>重置计数器</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        button { font-size: 18px; padding: 12px 30px; cursor: pointer; }
+        #msg { margin-top: 20px; color: green; }
+    </style>
+</head>
+<body>
+    <h2>计数器重置工具</h2>
+    <p>当前计数：<span id="current">...</span></p>
+    <button onclick="reset()">重置归零</button>
+    <p id="msg"></p>
+
+    <script>
+        const BASE = '/api/count';
+        const KEY = 'prose-beimang';
+
+        // 显示当前计数
+        fetch(`${BASE}/${KEY}`)
+            .then(r => r.json())
+            .then(d => document.getElementById('current').textContent = d.count || 0);
+
+        async function reset() {
+            if (!confirm('确定要将计数器归零吗？')) return;
+            try {
+                const res = await fetch(`${BASE}/${KEY}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('current').textContent = data.count || 0;
+                    document.getElementById('msg').textContent = '✅ 已归零！';
+                } else {
+                    document.getElementById('msg').textContent = '❌ 失败：' + data.error;
+                }
+            } catch (e) {
+                document.getElementById('msg').textContent = '❌ 网络错误';
+            }
+        }
+    </script>
+</body>
+</html>
