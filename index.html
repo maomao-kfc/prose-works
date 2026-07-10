@@ -179,80 +179,44 @@
 
 		<script>
 			// ==================== 访问计数（自建 Worker + 滚动触发 + 去重） ====================
+			// ==================== 访问计数（页面加载时自动计数 + 去重） ====================
 			(function() {
-				// 替换为你的 Worker URL
-				const WORKER_URL = 'https://lucky-sound-6456.1930744179-9b7.workers.dev';
-				const VISIT_KEY = 'prose-beimang'; // 计数器 key，更换可重置
-
-				const hitUrl = `${WORKER_URL}/${VISIT_KEY}`; // POST 递增
-				const getUrl = `${WORKER_URL}/${VISIT_KEY}`; // GET 获取
-
-				// 如果该浏览器已经触发过计数，只显示现有数字，不再触发
-				if (localStorage.getItem('hasVisited')) {
-					fetch(getUrl)
-						.then(res => res.json())
-						.then(data => {
-							document.getElementById('visit-count').textContent = data.count || 0;
-						})
-						.catch(() => {
-							const local = localStorage.getItem('localVisitCount');
-							if (local) document.getElementById('visit-count').textContent = local;
-						});
-					return;
-				}
-
-				// 创建隐藏标记点（放在文章末尾）
-				let marker = document.getElementById('visit-marker');
-				if (!marker) {
-					marker = document.createElement('div');
-					marker.id = 'visit-marker';
-					marker.style.cssText = 'height: 1px; width: 100%; position: absolute; bottom: 0; opacity: 0;';
-					const readMarker = document.getElementById('read-marker');
-					if (readMarker) {
-						readMarker.parentNode.insertBefore(marker, readMarker.nextSibling);
-					} else {
-						const article = document.querySelector('.article');
-						if (article) article.appendChild(marker);
-					}
-				}
-
-				let observer = new IntersectionObserver((entries) => {
-					if (entries[0].isIntersecting) {
-						observer.disconnect();
-
-						// 设置去重标记
-						localStorage.setItem('hasVisited', 'true');
-
-						// 调用 Worker 递增计数
-						fetch(hitUrl, {
-								method: 'POST'
-							})
-							.then(res => res.json())
-							.then(data => {
-								document.getElementById('visit-count').textContent = data.count;
-							})
-							.catch(() => {
-								let local = parseInt(localStorage.getItem('localVisitCount') || '0');
-								local++;
-								localStorage.setItem('localVisitCount', local);
-								document.getElementById('visit-count').textContent = local;
-							});
-					}
-				}, {
-					threshold: 0.1
-				});
-
-				observer.observe(marker);
-
-				// 初始显示当前计数（从 Worker 获取）
-				fetch(getUrl)
-					.then(res => res.json())
-					.then(data => {
-						document.getElementById('visit-count').textContent = data.count || 0;
-					})
-					.catch(() => {
-						document.getElementById('visit-count').textContent = '0';
-					});
+			    const WORKER_URL = 'https://lucky-sound-6456.1930744179-9b7.workers.dev';
+			    const VISIT_KEY = 'prose-beimang';
+			    const hitUrl = `${WORKER_URL}/${VISIT_KEY}`; // POST 递增
+			    const getUrl = `${WORKER_URL}/${VISIT_KEY}`; // GET 获取
+			
+			    // 第一步：显示当前计数（先获取一次）
+			    fetch(getUrl)
+			        .then(res => res.json())
+			        .then(data => {
+			            document.getElementById('visit-count').textContent = data.count || 0;
+			        })
+			        .catch(() => {
+			            document.getElementById('visit-count').textContent = '0';
+			        });
+			
+			    // 第二步：如果本设备从未计数过，则触发一次 POST 增加计数
+			    if (!localStorage.getItem('hasVisited')) {
+			        // 立即发送 POST 请求增加计数
+			        fetch(hitUrl, { method: 'POST' })
+			            .then(res => res.json())
+			            .then(data => {
+			                // 更新页面上的数字
+			                document.getElementById('visit-count').textContent = data.count;
+			                // 标记已访问，防止重复计数
+			                localStorage.setItem('hasVisited', 'true');
+			            })
+			            .catch(() => {
+			                // 网络失败时的降级：本地记录一次
+			                let local = parseInt(localStorage.getItem('localVisitCount') || '0');
+			                local++;
+			                localStorage.setItem('localVisitCount', local);
+			                document.getElementById('visit-count').textContent = local;
+			                // 即使网络失败，也标记已访问，避免下次重复请求
+			                localStorage.setItem('hasVisited', 'true');
+			            });
+			    }
 			})();
 			// ==================== 反爬保护（PC端 + 移动端） ====================
 			// (function() {
