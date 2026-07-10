@@ -197,7 +197,8 @@
 			        });
 			
 			    // 第二步：如果本设备从未计数过，则触发一次 POST 增加计数
-			    if (!localStorage.getItem('hasVisited_v2')) {
+			    if (localStorage.getItem('hasVisited') && !localStorage.getItem('hasVisited_v3'))) {
+					localStorage.setItem('hasVisited_v3', 'true'); // 继承旧标记
 			        // 立即发送 POST 请求增加计数
 			        fetch(hitUrl, { method: 'POST' })
 			            .then(res => res.json())
