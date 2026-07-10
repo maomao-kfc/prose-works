@@ -173,41 +173,51 @@
 			// Worker URL：https://lucky-sound-6456.1930744179-9b7.workers.dev
 			// ================================================================
 			(function() {
-				const WORKER_URL = 'https://lucky-sound-6456.1930744179-9b7.workers.dev';
-				const VISIT_KEY = 'prose-beimang';
-				const hitUrl = `${WORKER_URL}/${VISIT_KEY}`;
-				const getUrl = `${WORKER_URL}/${VISIT_KEY}`;
-				const MARK_KEY = 'hasVisited_v5';
-
-				// 1. 显示当前计数
-				fetch(getUrl)
-					.then(res => res.json())
-					.then(data => {
-						document.getElementById('visit-count').textContent = data.count || 0;
-					})
-					.catch(() => {
-						document.getElementById('visit-count').textContent = '0';
-					});
-
-				// 2. 如果本设备从未计数过，则触发 POST 增加计数
-				if (!localStorage.getItem(MARK_KEY)) {
-					fetch(hitUrl, {
-							method: 'POST'
-						})
-						.then(res => res.json())
-						.then(data => {
-							document.getElementById('visit-count').textContent = data.count;
-							localStorage.setItem(MARK_KEY, 'true');
-						})
-						.catch(() => {
-							// 降级方案：本地计数
-							let local = parseInt(localStorage.getItem('localVisitCount') || '0');
-							local++;
-							localStorage.setItem('localVisitCount', local);
-							document.getElementById('visit-count').textContent = local;
-							localStorage.setItem(MARK_KEY, 'true');
-						});
-				}
+			    const WORKER_URL = 'https://lucky-sound-6456.1930744179-9b7.workers.dev';
+			    const VISIT_KEY = 'prose-beimang';
+			    const hitUrl = `${WORKER_URL}/${VISIT_KEY}`;
+			    const getUrl = `${WORKER_URL}/${VISIT_KEY}`;
+			    const COOKIE_NAME = 'hasVisited_v6';   // 去重标记，改数字可重置
+			
+			    // 工具函数：读取 cookie
+			    function getCookie(name) {
+			        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+			        return match ? match[2] : null;
+			    }
+			
+			    // 工具函数：设置 cookie，有效期 30 天
+			    function setCookie(name, value, days) {
+			        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+			        document.cookie = name + '=' + value + ';expires=' + expires + ';path=/;SameSite=Lax';
+			    }
+			
+			    // 1. 获取并显示当前计数
+			    fetch(getUrl)
+			        .then(res => res.json())
+			        .then(data => {
+			            document.getElementById('visit-count').textContent = data.count || 0;
+			        })
+			        .catch(() => {
+			            document.getElementById('visit-count').textContent = '0';
+			        });
+			
+			    // 2. 如果该设备未计数过，则发送 POST 递增
+			    if (!getCookie(COOKIE_NAME)) {
+			        fetch(hitUrl, { method: 'POST' })
+			            .then(res => res.json())
+			            .then(data => {
+			                document.getElementById('visit-count').textContent = data.count;
+			                setCookie(COOKIE_NAME, 'true', 30);  // 标记已访问
+			            })
+			            .catch(() => {
+			                // 降级方案：本地计数（仅本设备可见）
+			                let local = parseInt(localStorage.getItem('localVisitCount') || '0');
+			                local++;
+			                localStorage.setItem('localVisitCount', local);
+			                document.getElementById('visit-count').textContent = local;
+			                setCookie(COOKIE_NAME, 'true', 30);  // 即使失败也标记，避免重复尝试
+			            });
+			    }
 			})();
 
 			// ================================================================
