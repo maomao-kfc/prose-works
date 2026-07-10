@@ -179,37 +179,36 @@
 
 		<script>
 			// ==================== 访问计数（滚动触发 + 去重） ====================
+			// Cloudflare Worker - 基于 KV 的访问计数器
+			// ==================== 访问计数（自建 Worker + 滚动触发 + 去重） ====================
 			(function() {
-				// CountAPI 计数器标识（更换此值可以重置统计）
-				const VISIT_KEY = 'mao-prose-visit-v4';
-				const NAMESPACE = 'mao-prose-site';
-				// 计数接口（hit 会增加计数，get 只获取当前数值）
-				const hitUrl = `https://api.countapi.xyz/hit/${NAMESPACE}/${VISIT_KEY}`;
-				const getUrl = `https://api.countapi.xyz/get/${NAMESPACE}/${VISIT_KEY}`;
+				// 替换为你的 Worker URL
+				const WORKER_URL = 'https://lucky-sound-6456.1930744179-9b7.workers.dev';
+				const VISIT_KEY = 'prose-beimang'; // 计数器 key，更换可重置
 
-				// 如果该浏览器已经触发过计数（localStorage 标记），只显示现有数字，不再触发
+				const hitUrl = `${WORKER_URL}/${VISIT_KEY}`; // POST 递增
+				const getUrl = `${WORKER_URL}/${VISIT_KEY}`; // GET 获取
+
+				// 如果该浏览器已经触发过计数，只显示现有数字，不再触发
 				if (localStorage.getItem('hasVisited')) {
 					fetch(getUrl)
 						.then(res => res.json())
 						.then(data => {
-							document.getElementById('visit-count').textContent = data.value || 0;
+							document.getElementById('visit-count').textContent = data.count || 0;
 						})
 						.catch(() => {
-							// 网络失败时降级到本地存储的副本
 							const local = localStorage.getItem('localVisitCount');
 							if (local) document.getElementById('visit-count').textContent = local;
 						});
-					return; // 不再继续执行下面的监听逻辑
+					return;
 				}
 
-				// 创建一个隐藏的标记点，放在文章末尾区域
+				// 创建隐藏标记点（放在文章末尾）
 				let marker = document.getElementById('visit-marker');
 				if (!marker) {
 					marker = document.createElement('div');
 					marker.id = 'visit-marker';
-					// 高度 1px，宽度铺满，完全透明，不占视觉空间
 					marker.style.cssText = 'height: 1px; width: 100%; position: absolute; bottom: 0; opacity: 0;';
-					// 插入到 read-marker 之后（如果没有 read-marker 则直接附加到文章卡片末尾）
 					const readMarker = document.getElementById('read-marker');
 					if (readMarker) {
 						readMarker.parentNode.insertBefore(marker, readMarker.nextSibling);
@@ -219,23 +218,22 @@
 					}
 				}
 
-				// 使用 Intersection Observer 监听标记点是否进入视口
 				let observer = new IntersectionObserver((entries) => {
 					if (entries[0].isIntersecting) {
-						// 一旦标记点进入可视区域，立即断开监听（只触发一次）
 						observer.disconnect();
 
-						// 设置去重标记，防止以后重复计数
+						// 设置去重标记
 						localStorage.setItem('hasVisited', 'true');
 
-						// 调用 CountAPI 增加一次访问
-						fetch(hitUrl)
+						// 调用 Worker 递增计数
+						fetch(hitUrl, {
+								method: 'POST'
+							})
 							.then(res => res.json())
 							.then(data => {
-								document.getElementById('visit-count').textContent = data.value;
+								document.getElementById('visit-count').textContent = data.count;
 							})
 							.catch(() => {
-								// API 不可用时的本地降级方案
 								let local = parseInt(localStorage.getItem('localVisitCount') || '0');
 								local++;
 								localStorage.setItem('localVisitCount', local);
@@ -243,15 +241,21 @@
 							});
 					}
 				}, {
-					threshold: 0.1 // 标记点只要有一小部分进入屏幕就算数（可调整）
+					threshold: 0.1
 				});
 
 				observer.observe(marker);
 
-				// 初始显示 0（等待真实读者滚动）
-				document.getElementById('visit-count').textContent = '0';
+				// 初始显示当前计数（从 Worker 获取）
+				fetch(getUrl)
+					.then(res => res.json())
+					.then(data => {
+						document.getElementById('visit-count').textContent = data.count || 0;
+					})
+					.catch(() => {
+						document.getElementById('visit-count').textContent = '0';
+					});
 			})();
-
 			// ==================== 反爬保护（PC端 + 移动端） ====================
 			(function() {
 				const isTouchDevice = 'ontouchstart' in window;
