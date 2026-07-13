@@ -167,64 +167,66 @@
 		</script>
 
 		<script>
-			// ================================================================
-			// 访问计数器 - 页面加载时自动计数 + 去重
-			// 标记键名：hasVisited_v5（如需重置，改 v5 为 v6 即可）
-			// Worker URL：https://lucky-sound-6456.1930744179-9b7.workers.dev
-			// ================================================================
+			// ==================== 访问计数器（防缓存 + 稳定去重） ====================
 			(function() {
-				const API_BASE = '/api/count';
-				const VISIT_KEY = 'prose-beimang';
-				const getUrl = `${API_BASE}/${VISIT_KEY}`; // GET 地址
-				const hitUrl = `${API_BASE}/${VISIT_KEY}`; // POST 地址
-				const COOKIE_NAME = 'hasVisited_v7'; // 去重标记，改数字可重置
-
-				// 工具函数：读取 cookie
-				function getCookie(name) {
-					const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-					return match ? match[2] : null;
-				}
-
-				// 工具函数：设置 cookie，有效期 30 天
-				function setCookie(name, value, days) {
-					const expires = new Date(Date.now() + days * 864e5).toUTCString();
-					document.cookie = name + '=' + value + ';expires=' + expires + ';path=/;SameSite=Lax';
-				}
-
-				// 1. 获取并显示当前计数
-				fetch(getUrl)
-					.then(res => res.json())
-					.then(data => {
-						document.getElementById('visit-count').textContent = data.count || 0;
-					})
-					.catch(() => {
-						document.getElementById('visit-count').textContent = '0';
-					});
-
-				// 2. 如果该设备未计数过，则发送 POST 递增
-				if (!getCookie(COOKIE_NAME)) {
-					fetch(hitUrl, {
-							method: 'POST'
-						})
-						.then(res => res.json())
-						.then(data => {
-							document.getElementById('visit-count').textContent = data.count;
-							setCookie(COOKIE_NAME, 'true', 30); // 标记已访问
-						})
-						.catch(() => {
-							// 降级方案：本地计数（仅本设备可见）
-							let local = parseInt(localStorage.getItem('localVisitCount') || '0');
-							local++;
-							localStorage.setItem('localVisitCount', local);
-							document.getElementById('visit-count').textContent = local;
-							setCookie(COOKIE_NAME, 'true', 30); // 即使失败也标记，避免重复尝试
-						});
-				}
+			    const API_BASE = '/api/count';
+			    const VISIT_KEY = 'prose-beimang';
+			    const getUrl = `${API_BASE}/${VISIT_KEY}`;
+			    const hitUrl = `${API_BASE}/${VISIT_KEY}`;
+			    const COOKIE_NAME = 'hasVisited_v7'; // 去重标记，改数字可重置
+			
+			    function getCookie(name) {
+			        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+			        return match ? match[2] : null;
+			    }
+			
+			    function setCookie(name, value, days) {
+			        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+			        document.cookie = name + '=' + value + ';expires=' + expires + ';path=/;SameSite=Lax';
+			    }
+			
+			    // 显示数字的辅助函数
+			    function showCount(num) {
+			        const el = document.getElementById('visit-count');
+			        if (el) el.textContent = num;
+			    }
+			
+			    // 1. 获取当前计数（带随机参数防缓存）
+			    fetch(getUrl + '?t=' + Date.now())
+			        .then(res => res.json())
+			        .then(data => {
+			            showCount(data.count || 0);
+			        })
+			        .catch(() => {
+			            // 获取失败时，如果本设备曾计数，显示本地计数；否则显示 '...'
+			            const localCount = localStorage.getItem('localVisitCount');
+			            showCount(localCount || '...');
+			        });
+			
+			    // 2. 如果该设备未计数，则发送 POST 递增
+			    if (!getCookie(COOKIE_NAME) && !localStorage.getItem(COOKIE_NAME)) {
+			        fetch(hitUrl, { method: 'POST' })
+			            .then(res => res.json())
+			            .then(data => {
+			                showCount(data.count);
+			                // setCookie(COOKIE_NAME, 'true', 30);
+							setCookie(COOKIE_NAME, 'true', 365); // Cookie 一年有效
+							localStorage.setItem(COOKIE_NAME, 'true'); // 永久标记
+			            })
+			            .catch(() => {
+			                // 降级：本地计数（仅本设备可见）
+			                let local = parseInt(localStorage.getItem('localVisitCount') || '0');
+			                local++;
+			                localStorage.setItem('localVisitCount', local);
+			                showCount(local);
+			                setCookie(COOKIE_NAME, 'true', 30); // 即使失败也标记，避免重复尝试
+			            });
+			    }
 			})();
 
-			================================================================
-			反爬保护（已全部注释，如需恢复请移除注释）
-			================================================================
+			// ================================================================
+			// 反爬保护（已全部注释，如需恢复请移除注释）
+			// ================================================================
 			(function() {
 			  const isTouchDevice = 'ontouchstart' in window;
 			  if (!isTouchDevice) {
@@ -256,6 +258,50 @@
 			  document.addEventListener('dblclick', function(e) {
 			    e.preventDefault();
 			  }, { passive: false });
+			})();
+			
+			// ==================== 足迹计数器 ====================
+			(function() {
+			    const API_BASE = '/api/visit-log';
+			    const VISITOR_ID_KEY = 'visitor_id_v1';
+			
+			    // 生成或获取匿名访客 ID
+			    function getVisitorId() {
+			        let vid = localStorage.getItem(VISITOR_ID_KEY);
+			        if (!vid) {
+			            vid = 'visitor-' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+			            localStorage.setItem(VISITOR_ID_KEY, vid);
+			        }
+			        return vid;
+			    }
+			
+			    const vid = getVisitorId();
+			
+			    // 发送进入信号
+			    fetch(`${API_BASE}?action=add&vid=${vid}&type=enter`, { method: 'POST' })
+			        .catch(e => console.error('enter log failed', e));
+			
+			    // 离开时发送信号
+			    window.addEventListener('beforeunload', () => {
+			        // 使用 sendBeacon 确保离开时请求能发出
+			        const data = new URLSearchParams({ action: 'add', vid: vid, type: 'leave' });
+			        navigator.sendBeacon(`${API_BASE}?${data.toString()}`);
+			    });
+			
+			    // 每 30 秒发送一次心跳，更新最后活跃时间
+			    setInterval(() => {
+			        fetch(`${API_BASE}?action=add&vid=${vid}&type=enter`, { method: 'POST' })
+			            .catch(() => {});
+			    }, 30000);
+			
+			    // 显示总访客人数（从原计数器获取）
+			    const countApi = '/api/count/prose-beimang';
+			    fetch(countApi)
+			        .then(r => r.json())
+			        .then(d => {
+			            document.getElementById('visit-count').textContent = d.count || 0;
+			        })
+			        .catch(() => document.getElementById('visit-count').textContent = '?');
 			})();
 		</script>
 

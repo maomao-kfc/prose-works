@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>足迹</title>
+		<style>
+			body {
+				font-family: sans-serif;
+				margin: 20px;
+			}
+
+			table {
+				border-collapse: collapse;
+				width: 100%;
+			}
+
+			th,
+			td {
+				border: 1px solid #ccc;
+				padding: 8px;
+				text-align: left;
+			}
+
+			th {
+				background: #f5f5f5;
+			}
+
+			.duration {
+				color: #666;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>访客足迹</h1>
+		<div id="loading">加载中...</div>
+		<table id="log-table" style="display:none;">
+			<thead>
+				<tr>
+					<th>访客 ID</th>
+					<th>访问次数</th>
+					<th>总停留时长</th>
+					<th>最后访问时间</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+		<script>
+			const TOKEN = new URLSearchParams(window.location.search).get('token') || '';
+			const API = `/api/visit-log?action=query&token=${TOKEN}`;
+
+			function formatDuration(ms) {
+				const seconds = Math.floor(ms / 1000);
+				if (seconds < 60) return `${seconds} 秒`;
+				const minutes = Math.floor(seconds / 60);
+				if (minutes < 60) return `${minutes} 分 ${seconds % 60} 秒`;
+				const hours = Math.floor(minutes / 60);
+				return `${hours} 小时 ${minutes % 60} 分`;
+			}
+
+			function formatTime(ts) {
+				return new Date(ts).toLocaleString();
+			}
+
+			fetch(API)
+				.then(r => r.json())
+				.then(data => {
+					document.getElementById('loading').style.display = 'none';
+					if (data.error) {
+						document.body.innerHTML = '<h2>无权限访问</h2>';
+						return;
+					}
+					const tbody = document.querySelector('#log-table tbody');
+					data.forEach(log => {
+						const row = tbody.insertRow();
+						row.innerHTML = `
+                        <td>${log.vid}</td>
+                        <td>${log.visits}</td>
+                        <td class="duration">${formatDuration(log.totalDuration)}</td>
+                        <td>${formatTime(log.lastLeave)}</td>
+                    `;
+					});
+					document.getElementById('log-table').style.display = 'table';
+				})
+				.catch(e => {
+					document.getElementById('loading').textContent = '加载失败';
+				});
+		</script>
+	</body>
+</html>
