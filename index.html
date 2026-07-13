@@ -277,31 +277,23 @@
 			
 			    const vid = getVisitorId();
 			
-			    // 发送进入信号
+			    // 发送进入信号（增加访问次数）
 			    fetch(`${API_BASE}?action=add&vid=${vid}&type=enter`, { method: 'POST' })
 			        .catch(e => console.error('enter log failed', e));
 			
-			    // 离开时发送信号
+			    // 离开时发送信号（记录停留时长）
 			    window.addEventListener('beforeunload', () => {
-			        // 使用 sendBeacon 确保离开时请求能发出
 			        const data = new URLSearchParams({ action: 'add', vid: vid, type: 'leave' });
 			        navigator.sendBeacon(`${API_BASE}?${data.toString()}`);
 			    });
 			
-			    // 每 30 秒发送一次心跳，更新最后活跃时间
+			    // 每 30 秒发送一次心跳（仅更新活跃时间，不增加访问次数）
 			    setInterval(() => {
-			        fetch(`${API_BASE}?action=add&vid=${vid}&type=enter`, { method: 'POST' })
+			        fetch(`${API_BASE}?action=add&vid=${vid}&type=heartbeat`, { method: 'POST' })
 			            .catch(() => {});
 			    }, 30000);
 			
-			    // 显示总访客人数（从原计数器获取）
-			    const countApi = '/api/count/prose-beimang';
-			    fetch(countApi)
-			        .then(r => r.json())
-			        .then(d => {
-			            document.getElementById('visit-count').textContent = d.count || 0;
-			        })
-			        .catch(() => document.getElementById('visit-count').textContent = '?');
+			    // 注意：这里不再更新 visit-count，避免与第一个计数器脚本冲突
 			})();
 		</script>
 
