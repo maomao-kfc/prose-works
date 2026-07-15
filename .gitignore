@@ -1,0 +1,6 @@
+# 依赖和缓存
+node_modules/
+.wrangler/
+
+# 本地备忘（含口令等敏感信息，不提交到 Git）
+.local/
