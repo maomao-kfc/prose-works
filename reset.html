@@ -7,35 +7,110 @@
         body { font-family: sans-serif; text-align: center; padding: 50px; }
         button { font-size: 18px; padding: 12px 30px; cursor: pointer; }
         #msg { margin-top: 20px; color: green; }
+        /* 口令验证区样式 */
+        #auth-section { margin-bottom: 30px; }
+        #auth-section input { font-size: 16px; padding: 8px 12px; margin: 0 5px; }
+        #auth-section button { font-size: 16px; padding: 8px 20px; }
+        /* 操作区默认隐藏，验证通过后才显示 */
+        #main-section { display: none; }
     </style>
 </head>
 <body>
     <h2>计数器重置工具</h2>
-    <p>当前计数：<span id="current">...</span></p>
-    <button onclick="reset()">重置归零</button>
-    <p id="msg"></p>
+
+    <!-- ===== 口令验证区（新增） ===== -->
+    <!-- 旧版：直接显示重置按钮，任何人都能重置计数器，不安全 -->
+    <!-- 新版：必须先输入管理口令，验证通过后才显示操作区 -->
+    <!-- 口令通过 /api/visit-log?action=query&token=xxx 接口验证 -->
+    <div id="auth-section">
+        <p>请输入管理口令</p>
+        <!-- type="password" 隐藏输入内容，防止旁人偷看 -->
+        <input type="password" id="token-input" placeholder="口令" />
+        <button onclick="authenticate()">验证</button>
+        <p id="auth-msg" style="color: red; margin-top: 10px;"></p>
+    </div>
+
+    <!-- ===== 操作区（验证通过后显示） ===== -->
+    <div id="main-section">
+        <p>当前计数：<span id="current">...</span></p>
+        <button onclick="reset()">重置归零</button>
+        <p id="msg"></p>
+    </div>
 
     <script>
-        const BASE = '/api/count';
-        const KEY = 'prose-beimang';
+        const BASE = '/api/count';      // 计数器 API 路径
+        const KEY = 'prose-beimang';     // KV 中的计数器 key
+        let TOKEN = '';                   // 验证通过后保存的口令
 
-        // 显示当前计数
-        fetch(`${BASE}/${KEY}`)
-            .then(r => r.json())
-            .then(d => document.getElementById('current').textContent = d.count || 0);
+        // ================================================================
+        // 口令验证函数
+        // ================================================================
+        // 原理：调用足迹查询接口 /api/visit-log?action=query&token=xxx
+        //       如果口令正确，接口返回 200 + 访客数据
+        //       如果口令错误，接口返回 403 Forbidden
+        // 这里只关心状态码，不需要返回的数据内容
+        // ================================================================
+        function authenticate() {
+            TOKEN = document.getElementById('token-input').value.trim();
+            if (!TOKEN) {
+                document.getElementById('auth-msg').textContent = '请输入口令';
+                return;
+            }
+            // 通过调用足迹查询接口验证口令是否正确
+            // encodeURIComponent 防止口令中含特殊字符导致 URL 解析错误
+            fetch(`/api/visit-log?action=query&token=${encodeURIComponent(TOKEN)}`)
+                .then(r => {
+                    if (r.ok) {
+                        // 验证通过：隐藏验证区，显示操作区
+                        document.getElementById('auth-section').style.display = 'none';
+                        document.getElementById('main-section').style.display = 'block';
+                        loadCount(); // 加载当前计数值
+                    } else {
+                        // 验证失败：显示错误提示，清空已保存的口令
+                        document.getElementById('auth-msg').textContent = '口令错误';
+                        TOKEN = '';
+                    }
+                })
+                .catch(() => {
+                    // 网络错误
+                    document.getElementById('auth-msg').textContent = '验证失败，请重试';
+                });
+        }
 
+        // 回车键触发验证（提升用户体验）
+        document.getElementById('token-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') authenticate();
+        });
+
+        // 加载当前计数值
+        function loadCount() {
+            fetch(`${BASE}/${KEY}`)
+                .then(r => r.json())
+                .then(d => document.getElementById('current').textContent = d.count || 0);
+        }
+
+        // ================================================================
+        // 重置计数器（归零）
+        // ================================================================
+        // 调用 DELETE /api/count/prose-beimang 将计数器归零
+        // 弹出确认对话框防止误操作
+        // ================================================================
         async function reset() {
+            // 二次确认，防止误触
             if (!confirm('确定要将计数器归零吗？')) return;
             try {
                 const res = await fetch(`${BASE}/${KEY}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (res.ok) {
+                    // 重置成功，更新页面显示
                     document.getElementById('current').textContent = data.count || 0;
                     document.getElementById('msg').textContent = '✅ 已归零！';
                 } else {
+                    // 服务端返回错误（如 key 不存在）
                     document.getElementById('msg').textContent = '❌ 失败：' + data.error;
                 }
             } catch (e) {
+                // 网络错误
                 document.getElementById('msg').textContent = '❌ 网络错误';
             }
         }

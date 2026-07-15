@@ -3,7 +3,26 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>散文</title>
+		<title>北邙山 — 个人纪念散文</title>
+
+		<!-- ===== SEO 优化标签（新增） ===== -->
+		<!-- description：搜索引擎结果中显示的页面摘要，影响点击率 -->
+		<meta name="description" content="《北邙山》——一篇关于五年情感记忆的个人纪念散文，致青春，致所有曾在时光里留下印记的人。">
+		<!-- author：标识作者，有助于搜索引擎理解内容来源 -->
+		<meta name="author" content="毛江俊">
+
+		<!-- ===== Open Graph 标签（新增） ===== -->
+		<!-- 用于社交媒体分享时显示的标题、描述、类型 -->
+		<!-- 没有这些标签，分享到微信/微博/Telegram 时会显示空白或随机截取内容 -->
+		<meta property="og:title" content="北邙山">
+		<meta property="og:description" content="一篇关于五年情感记忆的个人纪念散文，致青春，致所有曾在时光里留下印记的人。">
+		<meta property="og:type" content="article">
+		<meta property="og:locale" content="zh_CN">
+
+		<!-- ===== Favicon（新增） ===== -->
+		<!-- 使用 SVG 内联 data URI 作为网站图标，无需额外文件请求 -->
+		<!-- 🏔 山的 emoji 与"北邙山"主题呼应 -->
+		<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏔</text></svg>">
 	</head>
 	<body>
 		<!-- 文章卡片主体 -->
@@ -140,6 +159,7 @@
 				<p>醒悟总在发生后</p>
 				<p>十八、十九岁的你，不可能拥有来自二十岁的你所用的处理方式</p>
 				<p>“嗯”和“嗯嗯”本质上都没有区别，我也不知道我为什么有这种奇怪的要求</p>
+				<!-- <p>慢热的人，心动要慢慢熬，勇气要慢慢攒；敏感的人，一点风吹草动都能在心里演完一场大戏；拧巴的人，明明心里翻江倒海，嘴上偏要云淡风轻。两个这样的人相遇，就像两只怕疼的小刺猬，好不容易凑近了想互相取暖，稍微碰到一点尖刺，就都赶紧蜷成球滚远了。</p> -->
 				<p>如果我们没有相遇，我会感到遗憾</p>
 			</div>
 			<div>
@@ -152,10 +172,13 @@
 				<p>一张过期的船票，它除了纪念外，毫无用处</p>
 			</div>
 
-			<!-- 访问计数显示区域 -->
+			<!-- ===== 访问计数显示区域 ===== -->
+			<!-- 显示"已有 X 位朋友来过"，初始值为 "..." 避免闪烁 -->
+			<!-- 旧版初始值是 0，加载时会闪一下 "0" 再变成实际数字，体验不好 -->
+			<!-- 新版用 "..." 占位，等 API 返回后才显示真实数字 -->
 			<div class="visit-counter"
 				style="text-align: center; margin-top: 2rem; color: #b0a89a; font-size: 0.85rem;">
-				已有 <span id="visit-count">0</span> 位朋友来过
+				已有 <span id="visit-count">...</span> 位朋友来过
 			</div>
 
 			<!-- 原创声明 -->
@@ -179,7 +202,14 @@
 		</script>
 
 		<script>
-			// ==================== 访问计数器（防缓存 + 稳定去重） ====================
+			// ================================================================
+			// 模块一：访问计数器（防缓存 + Cookie/localStorage 双重去重）
+			// ================================================================
+			// 功能：统计有多少不同设备访问过本站
+			// 去重机制：Cookie（365天） + localStorage（永久），双重判断
+			// 防缓存：GET 请求带时间戳参数 ?t=xxx，避免 CDN/浏览器缓存返回旧数据
+			// 降级策略：API 失败时使用 localStorage 本地计数（仅本设备可见）
+			// ================================================================
 			(function() {
 			    const API_BASE = '/api/count';
 			    const VISIT_KEY = 'prose-beimang';
@@ -194,7 +224,7 @@
 			
 			    function setCookie(name, value, days) {
 			        const expires = new Date(Date.now() + days * 864e5).toUTCString();
-			        document.cookie = name + '=' + value + ';expires=' + expires + ';path=/;SameSite=Lax';
+			        document.cookie = name + '=' + value + ';expires=' + expires + ';path=/;SameSite=Lax;Secure';
 			    }
 			
 			    // 显示数字的辅助函数
@@ -255,24 +285,44 @@
 			      }
 			    });
 			  }
+			  // ---- 移动端保护 ----
 			  if (isTouchDevice) {
-			    document.addEventListener('contextmenu', e => e.preventDefault());
+			    document.addEventListener('contextmenu', e => e.preventDefault()); // 禁止长按弹出菜单
 			  }
-			  document.addEventListener('dragstart', e => e.preventDefault());
+			  // ---- 通用保护 ----
+			  document.addEventListener('dragstart', e => e.preventDefault()); // 禁止拖拽
 			  const article = document.querySelector('.article');
 			  if (article) {
-			    article.style.webkitUserSelect = 'none';
-			    article.style.userSelect = 'none';
+			    article.style.webkitUserSelect = 'none'; // WebKit 浏览器禁止选择
+			    article.style.userSelect = 'none';       // 标准属性禁止选择
 			    if (isTouchDevice) {
-			      article.style.webkitTouchCallout = 'none';
+			      article.style.webkitTouchCallout = 'none'; // iOS 长按不弹出菜单
 			    }
 			  }
 			  document.addEventListener('dblclick', function(e) {
-			    e.preventDefault();
+			    e.preventDefault(); // 禁止双击选中文字
 			  }, { passive: false });
 			})();
 			
 			// ==================== 足迹计数器 ====================
+			// ================================================================
+			// 模块三：访客足迹系统（匿名 ID + 心跳 + 离开检测）
+			// ================================================================
+			// 功能：记录每个匿名访客的访问次数、停留时长、活跃状态
+			// 与"模块一"的区别：
+			//   模块一（计数器）：只统计总访问设备数，是一个全局数字
+			//   模块三（足迹）：记录每个访客的详细行为，用于 footprints.html 展示
+			//
+			// 三种事件类型：
+			//   enter     → 进入页面，访问次数 +1
+			//   leave     → 离开页面，计算本次停留时长并累加
+			//   heartbeat → 每 30 秒心跳，仅更新活跃时间，用于判断"是否在线"
+			//
+			// 匿名 ID 生成：
+			//   格式：visitor-{随机8位}{时间戳36进制}
+			//   存储在 localStorage，同一设备同一浏览器始终是同一个 ID
+			//   不使用 Cookie 是因为 Cookie 有容量限制且每次请求都会发送
+			// ================================================================
 			(function() {
 			    const API_BASE = '/api/visit-log';
 			    const VISITOR_ID_KEY = 'visitor_id_v1';
@@ -289,23 +339,32 @@
 			
 			    const vid = getVisitorId();
 			
-			    // 发送进入信号（增加访问次数）
+			    // ---- 进入信号 ----
+			    // 页面加载时立即发送，服务端 visits +1
 			    fetch(`${API_BASE}?action=add&vid=${vid}&type=enter`, { method: 'POST' })
 			        .catch(e => console.error('enter log failed', e));
 			
 			    // 离开时发送信号（记录停留时长）
 			    window.addEventListener('beforeunload', () => {
 			        const data = new URLSearchParams({ action: 'add', vid: vid, type: 'leave' });
-			        navigator.sendBeacon(`${API_BASE}?${data.toString()}`);
+			        if (navigator.sendBeacon) {
+		            navigator.sendBeacon(`${API_BASE}?${data.toString()}`);
+		        } else {
+		            try { fetch(`${API_BASE}?${data.toString()}`, { method: 'POST', keepalive: true }).catch(() => {}); } catch(e) {}
+		        }
 			    });
 			
-			    // 每 30 秒发送一次心跳（仅更新活跃时间，不增加访问次数）
+			    // ---- 心跳信号 ----
+			    // 每 30 秒发送一次，仅更新 lastHeartbeat 字段
+			    // 不增加 visits 计数，不更新 lastEnter/lastLeave
+			    // 用途：footprints.html 页面可通过 lastHeartbeat 判断访客是否仍在线
+			    //       超过一定时间没有心跳 = 访客已离开
 			    setInterval(() => {
 			        fetch(`${API_BASE}?action=add&vid=${vid}&type=heartbeat`, { method: 'POST' })
-			            .catch(() => {});
+			            .catch(() => {}); // 心跳失败静默忽略，不影响用户体验
 			    }, 30000);
 			
-			    // 注意：这里不再更新 visit-count，避免与第一个计数器脚本冲突
+			    // 注意：这里不再更新 visit-count 元素，避免与模块一（计数器）冲突
 			})();
 		</script>
 

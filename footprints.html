@@ -32,7 +32,11 @@
 	</head>
 	<body>
 		<h1>访客足迹</h1>
+
+		<!-- 加载状态提示 -->
 		<div id="loading">加载中...</div>
+
+		<!-- 访客数据表格（初始隐藏，数据加载成功后显示） -->
 		<table id="log-table" style="display:none;">
 			<thead>
 				<tr>
@@ -44,10 +48,30 @@
 			</thead>
 			<tbody></tbody>
 		</table>
+
 		<script>
+			// ================================================================
+			// 访客足迹展示页
+			// ================================================================
+			// 功能：从 /api/visit-log 接口获取所有访客记录，以表格形式展示
+			// 安全：必须通过 URL 参数 ?token=xxx 提供管理口令
+			//       口令错误时接口返回 403 + { error: 'Forbidden' }
+			//       页面检测到 error 字段后显示"无权限访问"
+			// 使用：footprints.html?token=你的口令
+			// ================================================================
+
+			// 从 URL 参数中提取口令
+			// 例：footprints.html?token=ILoveBeimang → TOKEN = 'ILoveBeimang'
 			const TOKEN = new URLSearchParams(window.location.search).get('token') || '';
+			// 构建查询 API 地址，口令通过 URL 参数传递
 			const API = `/api/visit-log?action=query&token=${TOKEN}`;
 
+			// ================================================================
+			// 工具函数：毫秒数转可读时长
+			// ================================================================
+			// 例：65000ms → "1 分 5 秒"
+			//     3723000ms → "1 小时 2 分"
+			// ================================================================
 			function formatDuration(ms) {
 				const seconds = Math.floor(ms / 1000);
 				if (seconds < 60) return `${seconds} 秒`;
@@ -57,18 +81,32 @@
 				return `${hours} 小时 ${minutes % 60} 分`;
 			}
 
+			// 时间戳转本地时间字符串
+			// 例：1720800000000 → "2024/7/12 22:40:00"
 			function formatTime(ts) {
 				return new Date(ts).toLocaleString();
 			}
 
+			// ================================================================
+			// 数据加载与渲染
+			// ================================================================
+			// 接口返回格式：[{ vid, visits, firstVisit, lastEnter, lastLeave,
+			//                   totalDuration, lastHeartbeat }, ...]
+			// 按最后活跃时间倒序排列（最近访问的排最前）
+			// ================================================================
 			fetch(API)
 				.then(r => r.json())
 				.then(data => {
+					// 隐藏加载提示
 					document.getElementById('loading').style.display = 'none';
+
+					// 检查是否返回了错误（口令错误或权限不足）
 					if (data.error) {
 						document.body.innerHTML = '<h2>无权限访问</h2>';
 						return;
 					}
+
+					// 遍历每条访客记录，生成表格行
 					const tbody = document.querySelector('#log-table tbody');
 					data.forEach(log => {
 						const row = tbody.insertRow();
@@ -79,9 +117,12 @@
                         <td>${formatTime(log.lastLeave)}</td>
                     `;
 					});
+
+					// 显示表格
 					document.getElementById('log-table').style.display = 'table';
 				})
 				.catch(e => {
+					// 网络错误或接口不可用
 					document.getElementById('loading').textContent = '加载失败';
 				});
 		</script>

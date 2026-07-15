@@ -1,3 +1,13 @@
+<!-- ================================================================ -->
+<!-- 旧版文章页面备份 -->
+<!-- 与 index.html 的主要区别： -->
+<!--   1. 使用不蒜子(busuanzi)第三方计数服务，而非自建 KV 计数器 -->
+<!--   2. 有全屏水印（"毛江俊"斜体重复铺满），index.html 已移除 -->
+<!--   3. 没有访客足迹系统（enter/leave/heartbeat） -->
+<!--   4. 没有 SEO meta 标签、没有 favicon -->
+<!--   5. 文章内容为旧版本（部分措辞不同） -->
+<!-- ================================================================ -->
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -107,6 +117,10 @@
 			<div id="read-marker" style="height: 1px;"></div>
 			<!-- 字数统计展示行 -->
 			<div id="word-count" style="text-align: center; color: #999; font-size: 0.9rem; margin-bottom: 2rem;"></div>
+			<!-- ===== 不蒜子计数器（第三方服务） ===== -->
+			<!-- 与 index.html 的自建 KV 计数器不同，这里使用不蒜子(busuanzi) -->
+			<!-- 不蒜子是免费的第三方访问统计服务，无需后端 -->
+			<!-- 缺点：数据存在第三方，不可控；服务可能不稳定 -->
 			<div class="visit-counter"
 				style="text-align: center; margin-top: 2rem; color: #b0a89a; font-size: 0.85rem;">
 				<span id="busuanzi_container_site_uv" style="display:none;">
@@ -121,9 +135,13 @@
 
 	</body>
 </html>
+<!-- Cloudflare Web Analytics：与 index.html 相同 -->
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
 	data-cf-beacon='{"token": "ab60b105e61d47b9abf03d95d9324e7d"}'></script>
+<!-- 不蒜子计数器脚本：第三方访问统计服务，自动填充 busuanzi_value_site_uv -->
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 字数统计：统计文章所有段落的非空白字符数，显示在页面底部 -->
+<!-- index.html 没有此功能，字数是硬编码在 HTML 中的 -->
 <script>
 	(function() {
 		// 获取所有段落文本
@@ -146,7 +164,7 @@
 		container.textContent = `全文约 ${count} 字 作者：毛江俊`;
 	})();
 
-	// 整合反爬（PC端+移动端，互不冲突）
+	// 反爬保护：与 index.html 相同，禁止右键/选择/快捷键/拖拽/双击
 	(function() {
 		// 判断是否为触摸设备（移动端）
 		const isTouchDevice = 'ontouchstart' in window;
@@ -411,7 +429,12 @@
 		}
 	}
 
-	/* 全屏水印层 */
+	/* ===== 全屏水印层（index.html 已移除此功能） ===== */
+	/* 使用 body::after 伪元素创建覆盖全屏的半透明水印 */
+	/* 原理：SVG 内联 data URI 作为背景图，重复铺满整个页面 */
+	/* "毛江俊" 三个字以 -30° 旋转、5% 透明度重复显示 */
+	/* pointer-events: none 确保水印不影响页面交互 */
+	/* z-index: 9999 确保水印在最上层 */
 	body::after {
 		content: "";
 		position: fixed;
@@ -426,7 +449,8 @@
 	}
 
 
-	/* 文章区域如果需要放行选择（比如你想让人家复制就删掉这些） */
+	/* 文章区域禁止选择（配合反爬 JS） */
+	/* 如需允许复制，删除此规则即可 */
 	.article,
 	.article * {
 		-webkit-touch-callout: none;
